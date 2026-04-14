@@ -4,15 +4,10 @@ using UnityEngine;
 
 public class NPC : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
+    [SerializeField] Transform _npcTransform;
     void Update()
     {
-        
+      // use translate to make npc go into the cafe and then stop
+      // so startdestination to stopdestination. 
     }
 }
