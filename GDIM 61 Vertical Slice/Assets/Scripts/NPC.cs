@@ -10,6 +10,7 @@ public class NPC : MonoBehaviour
     [SerializeField] public float speed = 3f;
     void Update()
     {
+        float distance = Vector3.Distance(transform.position, currentTarget.position);
         Vector3 direction = (_destination.position - transform.position).normalized;
         transform.position += direction * speed * Time.deltaTime;
 
