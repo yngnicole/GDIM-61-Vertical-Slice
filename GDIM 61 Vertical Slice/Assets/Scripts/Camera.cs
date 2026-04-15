@@ -31,13 +31,12 @@ public class Camera : MonoBehaviour
     void HandlePan()
     {
      
-        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1))
         {
             lastMousePosition = Input.mousePosition;
         }
 
-
-        if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1))
         {
             
             Vector3 delta = Input.mousePosition - lastMousePosition;
