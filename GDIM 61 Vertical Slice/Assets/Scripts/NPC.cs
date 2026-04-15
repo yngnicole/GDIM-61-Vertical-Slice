@@ -10,10 +10,11 @@ public class NPC : MonoBehaviour
     [SerializeField] public float speed = 3f;
     void Update()
     {
-        float distance = Vector3.Distance(transform.position, currentTarget.position);
-        Vector3 direction = (_destination.position - transform.position).normalized;
-        transform.position += direction * speed * Time.deltaTime;
-
+        if (Vector3.Distance(transform.position, _destination.position) > 0.1f)
+        {
+            Vector3 direction = (_destination.position - transform.position).normalized;
+            transform.position += direction * speed * Time.deltaTime;
+        }
 
         // use translate to make npc go into the cafe and then stop
         // so startdestination to stopdestination. 
