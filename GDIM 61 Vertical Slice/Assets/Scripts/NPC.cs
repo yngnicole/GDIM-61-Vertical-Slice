@@ -11,6 +11,7 @@ public class NPC : MonoBehaviour
     bool hasArrived = false;
 
     public event Action OnArrived;
+
     public void SetDestination(Transform dest)
     {
         _destination = dest;
