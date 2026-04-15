@@ -349,6 +349,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46b31a27d49d85042b89a0762eb33a3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  panSpeed: 20
+  zoomSpeed: 5
+  minSize: 2
+  maxSize: 15
 --- !u!1 &640620896
 GameObject:
   m_ObjectHideFlags: 0
@@ -631,6 +635,79 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7878350319992209165, guid: dade6ea649b17ad489c2e7d166e5132e, type: 3}
   m_PrefabInstance: {fileID: 485485328}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1833062026
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3.628181
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3.628181
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3.628181
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 4.1065
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.8003
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3520363435802413458, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4411044298439614967, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_Name
+      value: coffee_machine_ase (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8059814973562267259, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 2
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 33d693af5c8373d4e8e313e11c11f1bf, type: 3}
 --- !u!1 &1899495818
 GameObject:
   m_ObjectHideFlags: 0
@@ -875,3 +952,4 @@ SceneRoots:
   - {fileID: 691222697}
   - {fileID: 1899495819}
   - {fileID: 958720640}
+  - {fileID: 1833062026}
