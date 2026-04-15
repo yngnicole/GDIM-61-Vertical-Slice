@@ -1,14 +1,13 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class NPC : MonoBehaviour
 {
     [SerializeField] float speed = 3f;
     Transform _destination;
     bool hasArrived = false;
+    bool _leaving = false;
+    Transform _exitPoint;
 
     public event Action OnArrived;
 
@@ -16,8 +15,19 @@ public class NPC : MonoBehaviour
     {
         _destination = dest;
     }
+
+    public void SetExitPoint(Transform exit)
+    {
+        _exitPoint = exit;
+    }
+
     void Update()
     {
+        if (_leaving)
+        {
+            MoveToExit();
+            return;
+        }
         MoveInCafe();
     }
 
@@ -33,12 +43,37 @@ public class NPC : MonoBehaviour
         else
         {
             hasArrived = true;
-            OnArrived?.Invoke(); 
+            OnArrived?.Invoke();
+        }
+    }
+
+    private void MoveToExit()
+    {
+        if (_exitPoint == null)
+        {
+            Destroy(gameObject);
+            return;
         }
 
+        Vector3 target = _exitPoint.position;
+        if (Vector3.Distance(transform.position, target) > 0.1f)
+        {
+            Vector3 direction = (target - transform.position).normalized;
+            transform.position += direction * speed * Time.deltaTime;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
+    public void OrderFulfilled()
+    {
+        // Destroy speech bubble if still exists
+        var bubble = GetComponentInChildren<OrderBubble>();
+        if (bubble != null)
+            Destroy(bubble.gameObject);
 
-        //movement to walk out the cafe and disappears. 
-        //order icon that pops up and disappears once complete. 
+        _leaving = true;
     }
 }
