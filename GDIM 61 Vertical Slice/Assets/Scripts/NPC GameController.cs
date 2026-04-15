@@ -5,17 +5,20 @@ using UnityEngine;
 public class NPCGameController : MonoBehaviour
 {
     [SerializeField] GameObject _npcPrefab;
-
+    [SerializeField] Transform _spawnPoint;
+    [SerializeField] Transform _destination;
 
     private void Start()
     {
-        SpawnNPC();
     }
     public void SpawnNPC()
     {
-        
-        Vector3 spawnPosition = new Vector3(-5.35f, -3.71f, 0f);
+        GameObject npcObj = Instantiate(_npcPrefab, _spawnPoint.position, Quaternion.identity);
 
-        Instantiate(_npcPrefab, spawnPosition, UnityEngine.Quaternion.identity);
+        NPC npc = npcObj.GetComponent<NPC>();
+        npc.SetDestination(_destination);
+
     }
 }
+
+   

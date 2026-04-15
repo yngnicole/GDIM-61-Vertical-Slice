@@ -5,11 +5,17 @@ using static UnityEngine.GraphicsBuffer;
 
 public class NPC : MonoBehaviour
 {
-    [SerializeField] Transform _npcTransform;
-    [SerializeField] Transform _destination;
-    [SerializeField] public float speed = 3f;
+    [SerializeField] float speed = 3f;
+    Transform _destination;
+
+    public void SetDestination(Transform dest)
+    {
+        _destination = dest;
+    }
     void Update()
     {
+        if (_destination == null) return;
+
         if (Vector3.Distance(transform.position, _destination.position) > 0.1f)
         {
             Vector3 direction = (_destination.position - transform.position).normalized;

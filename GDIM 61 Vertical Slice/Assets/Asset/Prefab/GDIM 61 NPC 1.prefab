@@ -94,7 +94,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _npcTransform: {fileID: 8863015109730273093}
-  _destination: {fileID: 8854490313307495841, guid: 557550d218d26ae489a347667181d714, type: 3}
+  _destination: {fileID: 0}
   speed: 3
 --- !u!4 &8863015109730273093 stripped
 Transform:
