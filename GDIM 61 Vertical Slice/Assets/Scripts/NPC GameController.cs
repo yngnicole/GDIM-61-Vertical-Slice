@@ -10,6 +10,7 @@ public class NPCGameController : MonoBehaviour
 
     private void Start()
     {
+        SpawnNPC();
     }
     public void SpawnNPC()
     {
