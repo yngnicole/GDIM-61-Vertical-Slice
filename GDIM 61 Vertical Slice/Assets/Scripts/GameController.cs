@@ -1,18 +1,34 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] GameObject _speechBubblePrefab;
+
+    void OnEnable()
     {
-        
+        GameEvents.OnNPCSpawned += HandleNPCSpawned;
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnDisable()
     {
-        
+        GameEvents.OnNPCSpawned -= HandleNPCSpawned;
+    }
+
+    void HandleNPCSpawned(NPC npc)
+    {
+        npc.OnArrived += () => OnNPCArrived(npc);
+    }
+
+    void OnNPCArrived(NPC npc)
+    {
+        SpawnSpeechBubble(npc.transform);
+    }
+    public void SpawnSpeechBubble(Transform npcTransform)
+    {
+        GameObject bubble = Instantiate(_speechBubblePrefab);
+        bubble.transform.position = npcTransform.position + new Vector3(0, 1.5f, 0);
     }
 }

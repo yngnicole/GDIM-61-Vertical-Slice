@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +20,8 @@ public class NPCGameController : MonoBehaviour
         NPC npc = npcObj.GetComponent<NPC>();
         npc.SetDestination(_destination);
 
+        GameEvents.OnNPCSpawned?.Invoke(npc);
+       
     }
 }
 
