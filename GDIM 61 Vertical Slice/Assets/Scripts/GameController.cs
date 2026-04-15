@@ -28,7 +28,9 @@ public class GameController : MonoBehaviour
     }
     public void SpawnSpeechBubble(Transform npcTransform)
     {
-        GameObject bubble = Instantiate(_speechBubblePrefab);
-        bubble.transform.position = npcTransform.position + new Vector3(0, 1.5f, 0);
+        //GameObject bubble = Instantiate(_speechBubblePrefab);
+        //bubble.transform.position = npcTransform.position + new Vector3(0, 1.5f, 0);
+        GameObject bubble = Instantiate(_speechBubblePrefab, npcTransform, false);
+        bubble.transform.localPosition = new Vector3(0, 1.5f, -0.3f);
     }
 }
