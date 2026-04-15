@@ -731,6 +731,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1899495819}
     m_Modifications:
+    - target: {fileID: 2737944104300177580, guid: 51fa43a315d3048479a84f292f07b9b5, type: 3}
+      propertyPath: m_SortingOrder
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 3280162701315807127, guid: 51fa43a315d3048479a84f292f07b9b5, type: 3}
       propertyPath: _destination
       value: 
@@ -738,6 +742,10 @@ PrefabInstance:
     - target: {fileID: 8579985966517923616, guid: 51fa43a315d3048479a84f292f07b9b5, type: 3}
       propertyPath: m_Name
       value: GDIM 61 NPC 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579985966517923616, guid: 51fa43a315d3048479a84f292f07b9b5, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8863015109730273093, guid: 51fa43a315d3048479a84f292f07b9b5, type: 3}
       propertyPath: m_LocalPosition.x
