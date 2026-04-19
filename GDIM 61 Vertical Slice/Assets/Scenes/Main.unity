@@ -1500,7 +1500,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1624527894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2148,63 +2148,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1137695861}
   m_SourcePrefab: {fileID: -8435245712485981826, guid: 7ed979a372bf3104fa1d3b63b6b7c523, type: 3}
---- !u!1001 &5206504822160429489
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1479050425586909172, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_Name
-      value: coffee_pot_v2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 331.9729
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 422.87082
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831661066266400657, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: da4d19e0be6b9d0419ad41c53dd96613, type: 3}
 --- !u!1001 &6764150411305125945
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2285,4 +2228,3 @@ SceneRoots:
   - {fileID: 1899495819}
   - {fileID: 958720640}
   - {fileID: 1624527897}
-  - {fileID: 5206504822160429489}
