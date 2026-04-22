@@ -118,25 +118,29 @@ public static class GameBootstrap
                 font = Font.CreateDynamicFontFromOSFont(fontNames[0], 24);
         }
 
-        // Money text (top-right)
-        Text moneyText = CreateText(canvas.transform, "MoneyText",
-            new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1),
-            new Vector2(-20, -20), new Vector2(200, 50),
-            36, TextAnchor.UpperRight, font);
-        moneyText.text = "$0";
-        mgr.SetMoneyText(moneyText);
+        // Dedicated HUD canvas — Screen Space Overlay guarantees it renders above everything
+        GameObject hudGo = new GameObject("HUDCanvas");
+        Canvas hudCanvas = hudGo.AddComponent<Canvas>();
+        hudCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        hudCanvas.sortingOrder = 10;
+        hudGo.AddComponent<CanvasScaler>();
+        hudGo.AddComponent<GraphicRaycaster>();
 
-        // Status text (bottom-center) - tells player what to do next
-        Text statusText = CreateText(canvas.transform, "StatusText",
+        // Status text (bottom-center, shifted left to make room for money)
+        Text statusText = CreateText(hudGo.transform, "StatusText",
             new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-            new Vector2(0, 60), new Vector2(600, 60),
+            new Vector2(-100, 60), new Vector2(420, 60),
             28, TextAnchor.UpperCenter, font);
         statusText.text = "Waiting for NPC...";
-        statusText.transform.SetAsLastSibling();
-        Canvas textCanvas = statusText.gameObject.AddComponent<Canvas>();
-        textCanvas.overrideSorting = true;
-        textCanvas.sortingOrder = 5;
         mgr.SetStatusText(statusText);
+
+        // Money text (bottom, to the right of status text)
+        Text moneyText = CreateText(hudGo.transform, "MoneyText",
+            new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0),
+            new Vector2(190, 60), new Vector2(160, 60),
+            28, TextAnchor.UpperCenter, font);
+        moneyText.text = "$0";
+        mgr.SetMoneyText(moneyText);
 
         Debug.Log("[Bootstrap] UI created. Font: " + (font != null ? font.name : "NONE"));
     }

@@ -63,8 +63,9 @@ public class NPCGameController : MonoBehaviour
         int slot = GetFreeSlot();
         if (slot < 0) return;
 
+        Vector3 jitter = new Vector3(Random.Range(-0.4f, 0.4f), Random.Range(-0.5f, 0.5f), 0f);
         GameObject destGo = new GameObject("NPC Dest " + slot);
-        destGo.transform.position = Slots[slot];
+        destGo.transform.position = Slots[slot] + jitter;
 
         GameObject npcObj = Instantiate(_npcPrefab, _runtimeSpawn.position, Quaternion.identity);
         NPC npc = npcObj.GetComponent<NPC>();
