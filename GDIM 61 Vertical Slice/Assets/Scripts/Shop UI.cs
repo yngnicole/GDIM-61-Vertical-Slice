@@ -25,8 +25,11 @@ public class ShopUI : MonoBehaviour
         CoffeeMachine existing = Object.FindObjectOfType<CoffeeMachine>();
         if (existing == null) return;
 
-        // Clone the existing machine so visuals and sorting match exactly
+        // Clone the existing machine so visuals and sorting match exactly,
+        // then immediately wipe any runtime state (color, brew flags, icons)
         GameObject clone = Instantiate(existing.gameObject);
+        CoffeeMachine clonedCm = clone.GetComponent<CoffeeMachine>();
+        if (clonedCm != null) clonedCm.ResetToIdle();
 
         // Place it offset from the existing machine along the counter
         clone.transform.position = existing.transform.position + new Vector3(-1.5f, 0.75f, 0f);

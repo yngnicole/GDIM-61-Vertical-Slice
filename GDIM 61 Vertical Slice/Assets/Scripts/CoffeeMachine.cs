@@ -34,11 +34,23 @@ public class CoffeeMachine : MonoBehaviour
         if (_spriteRenderer != null)
             _spriteRenderer.color = _defaultColor;
 
-        // Remove coffee icon
         if (_coffeeIcon != null)
         {
             Destroy(_coffeeIcon);
             _coffeeIcon = null;
+        }
+    }
+
+    public void ResetToIdle()
+    {
+        _isBrewing = false;
+        _drinkReady = false;
+        if (_coffeeIcon != null) { Destroy(_coffeeIcon); _coffeeIcon = null; }
+        _spriteRenderer = GetComponent<SpriteRenderer>() ?? GetComponentInChildren<SpriteRenderer>();
+        if (_spriteRenderer != null)
+        {
+            _spriteRenderer.color = Color.white;
+            _defaultColor = Color.white;
         }
     }
 
