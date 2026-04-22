@@ -9,6 +9,8 @@ public class NPC : MonoBehaviour
     bool _leaving = false;
     Transform _exitPoint;
 
+    public Action OnLeft;
+
     public event Action OnArrived;
 
     public void SetDestination(Transform dest)
@@ -69,11 +71,15 @@ public class NPC : MonoBehaviour
 
     public void OrderFulfilled()
     {
-        // Destroy speech bubble if still exists
         var bubble = GetComponentInChildren<OrderBubble>();
         if (bubble != null)
             Destroy(bubble.gameObject);
 
         _leaving = true;
+    }
+
+    void OnDestroy()
+    {
+        OnLeft?.Invoke();
     }
 }

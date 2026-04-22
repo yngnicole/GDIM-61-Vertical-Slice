@@ -1,89 +1,105 @@
-using System;
+using System.Collections;
 using UnityEngine;
 
 public class NPCGameController : MonoBehaviour
 {
     [SerializeField] GameObject _npcPrefab;
     [SerializeField] Transform _spawnPoint;
-    [SerializeField] Transform _destination;
 
-    // World-space fallback positions (used if spawn/destination are in Canvas space)
-    Vector3 _worldSpawn = new Vector3(-8f, -4f, 0f);
-    Vector3 _worldDestination = new Vector3(-3f, -3.5f, 0f);
+    const int MaxNPCs = 5;
+    const float MinInterval = 1f;
+    const float MaxInterval = 5f;
 
-    Transform _runtimeSpawn;
-    Transform _runtimeDestination;
-
-    private void Start()
+    static readonly Vector3[] Slots = new Vector3[]
     {
-        SetupWorldPositions();
-        SpawnNPC();
+        new Vector3(-5f,  -3.5f, 0f),
+        new Vector3(-3.5f, -3.5f, 0f),
+        new Vector3(-2f,  -3.5f, 0f),
+        new Vector3(-0.5f, -3.5f, 0f),
+        new Vector3( 1f,  -3.5f, 0f),
+    };
+
+    readonly bool[] _slotOccupied = new bool[MaxNPCs];
+    int _activeCount;
+    Transform _runtimeSpawn;
+
+    void Start()
+    {
+        SetupSpawnPoint();
+        StartCoroutine(SpawnLoop());
     }
 
-    void SetupWorldPositions()
+    void SetupSpawnPoint()
     {
-        // Check if the assigned spawn point is inside a Canvas (UI space)
-        // If so, create world-space alternatives
-        bool spawnIsUI = _spawnPoint != null && _spawnPoint.GetComponentInParent<Canvas>() != null;
-        bool destIsUI = _destination != null && _destination.GetComponentInParent<Canvas>() != null;
-
-        if (spawnIsUI || _spawnPoint == null)
+        bool isUI = _spawnPoint != null && _spawnPoint.GetComponentInParent<Canvas>() != null;
+        if (isUI || _spawnPoint == null)
         {
-            GameObject spawnObj = new GameObject("NPC Spawn (World)");
-            spawnObj.transform.position = _worldSpawn;
-            _runtimeSpawn = spawnObj.transform;
-            Debug.Log("[NPCGameController] Using world-space spawn at " + _worldSpawn);
+            GameObject go = new GameObject("NPC Spawn (World)");
+            go.transform.position = new Vector3(-8f, -4f, 0f);
+            _runtimeSpawn = go.transform;
         }
         else
         {
             _runtimeSpawn = _spawnPoint;
         }
+    }
 
-        if (destIsUI || _destination == null)
+    IEnumerator SpawnLoop()
+    {
+        // Spawn first NPC immediately
+        TrySpawnNPC();
+
+        while (true)
         {
-            GameObject destObj = new GameObject("NPC Destination (World)");
-            destObj.transform.position = _worldDestination;
-            _runtimeDestination = destObj.transform;
-            Debug.Log("[NPCGameController] Using world-space destination at " + _worldDestination);
-        }
-        else
-        {
-            _runtimeDestination = _destination;
+            yield return new WaitForSeconds(Random.Range(MinInterval, MaxInterval));
+            TrySpawnNPC();
         }
     }
 
-    public void SpawnNPC()
+    void TrySpawnNPC()
     {
-        if (_npcPrefab == null)
-        {
-            Debug.LogWarning("[NPCGameController] Missing NPC prefab!");
-            return;
-        }
+        if (_npcPrefab == null || _activeCount >= MaxNPCs) return;
+
+        int slot = GetFreeSlot();
+        if (slot < 0) return;
+
+        GameObject destGo = new GameObject("NPC Dest " + slot);
+        destGo.transform.position = Slots[slot];
 
         GameObject npcObj = Instantiate(_npcPrefab, _runtimeSpawn.position, Quaternion.identity);
-
         NPC npc = npcObj.GetComponent<NPC>();
-        if (npc == null)
-        {
-            Debug.LogWarning("[NPCGameController] NPC prefab missing NPC component!");
-            return;
-        }
+        if (npc == null) { Destroy(npcObj); Destroy(destGo); return; }
 
-        npc.SetDestination(_runtimeDestination);
+        npc.SetDestination(destGo.transform);
         npc.SetExitPoint(_runtimeSpawn);
+        npc.OnLeft = () => FreeSlot(slot, destGo);
 
-        // Ensure NPC has a collider for click detection
         if (npcObj.GetComponent<Collider2D>() == null)
         {
             BoxCollider2D col = npcObj.AddComponent<BoxCollider2D>();
-            SpriteRenderer sr = npcObj.GetComponent<SpriteRenderer>();
-            if (sr == null) sr = npcObj.GetComponentInChildren<SpriteRenderer>();
+            SpriteRenderer sr = npcObj.GetComponent<SpriteRenderer>()
+                             ?? npcObj.GetComponentInChildren<SpriteRenderer>();
             if (sr != null && sr.sprite != null)
                 col.size = sr.sprite.bounds.size;
         }
 
-        Debug.Log("[NPCGameController] Spawned NPC at " + _runtimeSpawn.position
-            + " heading to " + _runtimeDestination.position);
+        _slotOccupied[slot] = true;
+        _activeCount++;
+
         GameEvents.OnNPCSpawned?.Invoke(npc);
+    }
+
+    int GetFreeSlot()
+    {
+        for (int i = 0; i < _slotOccupied.Length; i++)
+            if (!_slotOccupied[i]) return i;
+        return -1;
+    }
+
+    void FreeSlot(int slot, GameObject destGo)
+    {
+        _slotOccupied[slot] = false;
+        _activeCount = Mathf.Max(0, _activeCount - 1);
+        if (destGo != null) Destroy(destGo);
     }
 }
