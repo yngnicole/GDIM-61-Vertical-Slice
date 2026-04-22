@@ -126,12 +126,16 @@ public static class GameBootstrap
         moneyText.text = "$0";
         mgr.SetMoneyText(moneyText);
 
-        // Status text (top-center) - tells player what to do next
+        // Status text (bottom-center) - tells player what to do next
         Text statusText = CreateText(canvas.transform, "StatusText",
-            new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-            new Vector2(0, -20), new Vector2(600, 60),
+            new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0),
+            new Vector2(0, 60), new Vector2(600, 60),
             28, TextAnchor.UpperCenter, font);
         statusText.text = "Waiting for NPC...";
+        statusText.transform.SetAsLastSibling();
+        Canvas textCanvas = statusText.gameObject.AddComponent<Canvas>();
+        textCanvas.overrideSorting = true;
+        textCanvas.sortingOrder = 5;
         mgr.SetStatusText(statusText);
 
         Debug.Log("[Bootstrap] UI created. Font: " + (font != null ? font.name : "NONE"));
