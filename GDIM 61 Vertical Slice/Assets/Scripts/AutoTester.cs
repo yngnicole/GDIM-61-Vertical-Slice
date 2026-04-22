@@ -38,8 +38,8 @@ public class AutoTester : MonoBehaviour
         Debug.Log("[AutoTest] Step 1: Taking order...");
         mgr.TakeOrder(bubble.Owner);
         bubble.OnOrderTaken();
-        if (!mgr.HasTakenOrder(bubble.Owner)) { Fail("Order not registered"); yield break; }
-        Debug.Log("[AutoTest] PASS: Order taken. Pending: " + mgr.PendingOrderCount);
+        if (mgr.ActiveNPC != bubble.Owner) { Fail("Order not registered in hand"); yield break; }
+        Debug.Log("[AutoTest] PASS: Order taken.");
         yield return new WaitForSeconds(0.5f);
 
         // Step 2: Start brewing
@@ -64,8 +64,7 @@ public class AutoTester : MonoBehaviour
 
         // Step 4: Pick up drink
         Debug.Log("[AutoTest] Step 4: Picking up drink...");
-        mgr.PickUpDrink();
-        machine.OnPickedUp();
+        mgr.PickUpFrom(machine);
         if (!mgr.HoldingDrink) { Fail("Not holding drink after pickup"); yield break; }
         Debug.Log("[AutoTest] PASS: Drink picked up.");
         yield return new WaitForSeconds(0.5f);

@@ -13,24 +13,18 @@ public class OrderManager : MonoBehaviour
     int _money;
     public int Money => _money;
 
-    // All NPCs whose order has been taken but not yet delivered
-    readonly HashSet<NPC> _takenOrders = new HashSet<NPC>();
+    enum HandState { Empty, HoldingOrder, HoldingCoffee }
+    HandState _hand = HandState.Empty;
+    NPC _handNPC; // NPC whose order/coffee is in hand
 
-    // Whether the player is currently carrying a drink
-    bool _holdingDrink;
-    public bool HoldingDrink => _holdingDrink;
+    // Tracks which NPC each machine is brewing for
+    readonly Dictionary<CoffeeMachine, NPC> _brewingFor = new Dictionary<CoffeeMachine, NPC>();
 
-    public bool HasTakenOrder(NPC npc) => _takenOrders.Contains(npc);
-    public int PendingOrderCount => _takenOrders.Count;
+    Text _moneyText, _statusText;
 
-    // First pending NPC (used by AutoTester)
-    public NPC ActiveNPC
-    {
-        get { foreach (NPC n in _takenOrders) return n; return null; }
-    }
-
-    Text _moneyText;
-    Text _statusText;
+    // AutoTester helpers
+    public NPC ActiveNPC => _handNPC;
+    public bool HoldingDrink => _hand == HandState.HoldingCoffee;
 
     void Awake()
     {
@@ -57,41 +51,45 @@ public class OrderManager : MonoBehaviour
 
         foreach (Collider2D hit in hits)
         {
-            GameObject clicked = hit.gameObject;
+            GameObject obj = hit.gameObject;
 
-            // Take order from an NPC bubble (can take from multiple NPCs)
-            OrderBubble bubble = clicked.GetComponent<OrderBubble>()
-                              ?? clicked.GetComponentInParent<OrderBubble>();
-            if (bubble != null && bubble.Owner != null && !_takenOrders.Contains(bubble.Owner))
+            // Click NPC bubble while hand is empty → take order
+            OrderBubble bubble = obj.GetComponent<OrderBubble>()
+                              ?? obj.GetComponentInParent<OrderBubble>();
+            if (bubble != null && bubble.Owner != null && _hand == HandState.Empty)
             {
                 TakeOrder(bubble.Owner);
                 bubble.OnOrderTaken();
                 return;
             }
 
-            // Coffee machine interactions
-            CoffeeMachine machine = clicked.GetComponent<CoffeeMachine>()
-                                 ?? clicked.GetComponentInParent<CoffeeMachine>();
+            // Click machine while holding an order → start brewing
+            CoffeeMachine machine = obj.GetComponent<CoffeeMachine>()
+                                 ?? obj.GetComponentInParent<CoffeeMachine>();
             if (machine != null)
             {
-                // Start brewing if machine is idle and we have pending orders
-                if (!machine.IsBrewing && !machine.IsDrinkReady && _takenOrders.Count > 0)
+                if (_hand == HandState.HoldingOrder
+                    && !machine.IsBrewing && !machine.IsDrinkReady)
                 {
                     StartBrewing(machine);
                     return;
                 }
-                // Pick up if machine is done and player isn't already holding
-                if (machine.IsDrinkReady && !_holdingDrink)
+
+                // Click done machine while hand is empty → pick up coffee
+                if (_hand == HandState.Empty && machine.IsDrinkReady
+                    && _brewingFor.TryGetValue(machine, out NPC forNPC))
                 {
-                    PickUpDrink();
+                    _hand = HandState.HoldingCoffee;
+                    _handNPC = forNPC;
+                    _brewingFor.Remove(machine);
                     machine.OnPickedUp();
                     return;
                 }
             }
 
-            // Deliver to any NPC whose order was taken
-            NPC npc = clicked.GetComponent<NPC>() ?? clicked.GetComponentInParent<NPC>();
-            if (npc != null && _holdingDrink && _takenOrders.Contains(npc))
+            // Click NPC while holding matching coffee → deliver
+            NPC npc = obj.GetComponent<NPC>() ?? obj.GetComponentInParent<NPC>();
+            if (npc != null && _hand == HandState.HoldingCoffee && npc == _handNPC)
             {
                 FulfillOrder(npc);
                 return;
@@ -99,33 +97,46 @@ public class OrderManager : MonoBehaviour
         }
     }
 
+    // ── Public API (also used by AutoTester) ────────────────────────────────
+
     public void TakeOrder(NPC npc)
     {
-        _takenOrders.Add(npc);
+        if (_hand != HandState.Empty) return;
+        _hand = HandState.HoldingOrder;
+        _handNPC = npc;
     }
 
     public void StartBrewing(CoffeeMachine machine)
     {
-        if (machine == null || machine.IsBrewing || machine.IsDrinkReady) return;
+        if (machine == null || _hand != HandState.HoldingOrder) return;
+        if (machine.IsBrewing || machine.IsDrinkReady) return;
+        _brewingFor[machine] = _handNPC;
+        _hand = HandState.Empty;
+        _handNPC = null;
         machine.StartBrewing();
     }
 
-    public void PickUpDrink()
+    // Pick up from a specific machine (used by AutoTester)
+    public void PickUpFrom(CoffeeMachine machine)
     {
-        _holdingDrink = true;
+        if (machine == null || !machine.IsDrinkReady) return;
+        if (!_brewingFor.TryGetValue(machine, out NPC forNPC)) return;
+        _hand = HandState.HoldingCoffee;
+        _handNPC = forNPC;
+        _brewingFor.Remove(machine);
+        machine.OnPickedUp();
     }
 
     public void FulfillOrder(NPC npc)
     {
-        if (!_takenOrders.Contains(npc) || !_holdingDrink) return;
-        _takenOrders.Remove(npc);
-        _holdingDrink = false;
+        if (_hand != HandState.HoldingCoffee || npc != _handNPC) return;
+        _hand = HandState.Empty;
+        _handNPC = null;
         _money += _moneyPerOrder;
         UpdateMoneyUI();
         npc.OrderFulfilled();
     }
 
-    // Called by CoffeeMachine when brewing completes — no global state change needed
     public void OnBrewingComplete() { }
 
     public bool TrySpendMoney(int amount)
@@ -147,12 +158,17 @@ public class OrderManager : MonoBehaviour
     void UpdateStatusUI()
     {
         if (_statusText == null) return;
-
-        if (_holdingDrink)
-            _statusText.text = "Click an NPC to deliver";
-        else if (_takenOrders.Count > 0)
-            _statusText.text = "Click a machine to brew";
-        else
-            _statusText.text = "Click the order icon above NPC";
+        switch (_hand)
+        {
+            case HandState.Empty:
+                _statusText.text = "Click the order icon above an NPC";
+                break;
+            case HandState.HoldingOrder:
+                _statusText.text = "Click a coffee machine to brew";
+                break;
+            case HandState.HoldingCoffee:
+                _statusText.text = "Click the NPC to deliver";
+                break;
+        }
     }
 }
