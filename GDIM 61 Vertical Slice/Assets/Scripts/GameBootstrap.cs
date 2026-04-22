@@ -142,6 +142,21 @@ public static class GameBootstrap
         moneyText.text = "$0";
         mgr.SetMoneyText(moneyText);
 
+        // Move shop icon to HUD canvas so it's always visible at bottom-right
+        GameObject shopIcon = GameObject.Find("Shop icon");
+        if (shopIcon != null)
+        {
+            shopIcon.transform.SetParent(hudGo.transform, false);
+            RectTransform rt = shopIcon.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                rt.anchorMin = new Vector2(1, 0);
+                rt.anchorMax = new Vector2(1, 0);
+                rt.pivot = new Vector2(1, 0);
+                rt.anchoredPosition = new Vector2(-400, 100);
+            }
+        }
+
         Debug.Log("[Bootstrap] UI created. Font: " + (font != null ? font.name : "NONE"));
     }
 
