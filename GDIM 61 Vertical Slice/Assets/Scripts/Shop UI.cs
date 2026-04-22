@@ -29,7 +29,7 @@ public class ShopUI : MonoBehaviour
         GameObject clone = Instantiate(existing.gameObject);
 
         // Place it offset from the existing machine along the counter
-        clone.transform.position = existing.transform.position + new Vector3(-1.5f, 0f, 0f);
+        clone.transform.position = existing.transform.position + new Vector3(-1.5f, 0.75f, 0f);
 
         // Ensure a fresh CoffeeMachine component (no brewing state carried over)
         CoffeeMachine cm = clone.GetComponent<CoffeeMachine>();
