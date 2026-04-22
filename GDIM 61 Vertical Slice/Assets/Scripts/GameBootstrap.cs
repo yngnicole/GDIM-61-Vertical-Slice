@@ -16,6 +16,7 @@ public static class GameBootstrap
         SetupCoffeeMachines();
         SetupUI();
         SetupAutoTester();
+        SetupShop();
         Debug.Log("[Bootstrap] Setup complete! Press T to run automated test.");
     }
 
@@ -158,6 +159,73 @@ public static class GameBootstrap
         }
 
         Debug.Log("[Bootstrap] UI created. Font: " + (font != null ? font.name : "NONE"));
+    }
+
+    static void SetupShop()
+    {
+        // Find the Shop Canvas (inactive by default)
+        Canvas[] allCanvases = Object.FindObjectsOfType<Canvas>(true);
+        GameObject shopCanvasGo = null;
+        foreach (Canvas c in allCanvases)
+            if (c.gameObject.name == "Shop Canvas") { shopCanvasGo = c.gameObject; break; }
+
+        if (shopCanvasGo == null) { Debug.LogWarning("[Bootstrap] Shop Canvas not found"); return; }
+
+        // Add ShopUI component
+        ShopUI shopUI = shopCanvasGo.GetComponent<ShopUI>() ?? shopCanvasGo.AddComponent<ShopUI>();
+
+        // Wire up shop icon button → open shop
+        GameObject shopIconGo = GameObject.Find("Shop icon");
+        if (shopIconGo != null)
+        {
+            Button shopBtn = shopIconGo.GetComponent<Button>();
+            if (shopBtn != null)
+            {
+                shopBtn.onClick.RemoveAllListeners();
+                shopBtn.onClick.AddListener(shopUI.OpenShop);
+            }
+        }
+
+        // Wire up X button → close shop
+        Button xBtn = FindButtonInCanvas(shopCanvasGo, "X button");
+        if (xBtn != null)
+        {
+            xBtn.onClick.RemoveAllListeners();
+            xBtn.onClick.AddListener(shopUI.CloseShop);
+        }
+
+        // Wire up the Buy button → buy machine
+        Button buyBtn = FindButtonInCanvas(shopCanvasGo, "Buy ");
+        if (buyBtn != null)
+        {
+            buyBtn.onClick.RemoveAllListeners();
+            buyBtn.onClick.AddListener(shopUI.BuyCoffeeMachine);
+        }
+
+        // Also make the coffee pot image itself clickable (it's what the user sees and clicks)
+        Transform coffeePot = FindChildByName(shopCanvasGo.transform, "coffee pot");
+        if (coffeePot != null)
+        {
+            Button potBtn = coffeePot.GetComponent<Button>() ?? coffeePot.gameObject.AddComponent<Button>();
+            UnityEngine.UI.Image img = coffeePot.GetComponent<UnityEngine.UI.Image>();
+            if (img != null) potBtn.targetGraphic = img;
+            potBtn.onClick.RemoveAllListeners();
+            potBtn.onClick.AddListener(shopUI.BuyCoffeeMachine);
+        }
+    }
+
+    static Button FindButtonInCanvas(GameObject canvasGo, string name)
+    {
+        foreach (Button btn in canvasGo.GetComponentsInChildren<Button>(true))
+            if (btn.gameObject.name == name) return btn;
+        return null;
+    }
+
+    static Transform FindChildByName(Transform parent, string name)
+    {
+        foreach (Transform t in parent.GetComponentsInChildren<Transform>(true))
+            if (t.gameObject.name == name) return t;
+        return null;
     }
 
     static void SetupAutoTester()

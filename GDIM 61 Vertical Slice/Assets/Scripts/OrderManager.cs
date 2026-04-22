@@ -168,6 +168,14 @@ public class OrderManager : MonoBehaviour
         CurrentState = PlayerState.Idle;
     }
 
+    public bool TrySpendMoney(int amount)
+    {
+        if (_money < amount) return false;
+        _money -= amount;
+        UpdateMoneyUI();
+        return true;
+    }
+
     public void SetMoneyText(Text text)
     {
         _moneyText = text;
