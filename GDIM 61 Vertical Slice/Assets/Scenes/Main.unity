@@ -2104,7 +2104,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1962120753}
   m_CullTransparentMesh: 1
---- !u!1001 &5325365394305684960
+--- !u!1001 &5838338240813024012
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -2112,25 +2112,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1359238501617963985, guid: 4ed9cc0651fb68c42ac90004e2fb733b, type: 3}
-      propertyPath: m_SortingOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2373991871423413794, guid: 4ed9cc0651fb68c42ac90004e2fb733b, type: 3}
-      propertyPath: m_SortingOrder
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 4625731557958997085, guid: 4ed9cc0651fb68c42ac90004e2fb733b, type: 3}
       propertyPath: m_Name
-      value: GDIM 61 coffee 2
+      value: NEW coffee 1
       objectReference: {fileID: 0}
     - target: {fileID: 5610390948026678328, guid: 4ed9cc0651fb68c42ac90004e2fb733b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.776
+      value: -4.746
       objectReference: {fileID: 0}
     - target: {fileID: 5610390948026678328, guid: 4ed9cc0651fb68c42ac90004e2fb733b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.711
+      value: -2.758
       objectReference: {fileID: 0}
     - target: {fileID: 5610390948026678328, guid: 4ed9cc0651fb68c42ac90004e2fb733b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2248,4 +2240,4 @@ SceneRoots:
   - {fileID: 691222697}
   - {fileID: 1899495819}
   - {fileID: 1624527897}
-  - {fileID: 5325365394305684960}
+  - {fileID: 5838338240813024012}

@@ -14,7 +14,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3626916397498700004, guid: 18b06187a4190864a86b334ac648783c, type: 3}
       propertyPath: m_SortingOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 18b06187a4190864a86b334ac648783c, type: 3}
       propertyPath: m_LocalScale.x
@@ -88,7 +88,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -2253911629886400664, guid: b61052a636a69664fae6e6737a2a10d0, type: 3}
       propertyPath: m_Name
-      value: GDIM 61 coffee 2
+      value: NEW coffee 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3626916397498700004, guid: b61052a636a69664fae6e6737a2a10d0, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: b61052a636a69664fae6e6737a2a10d0, type: 3}
       propertyPath: m_LocalScale.x
@@ -104,11 +108,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: b61052a636a69664fae6e6737a2a10d0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.283
+      value: -4.746
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: b61052a636a69664fae6e6737a2a10d0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.425
+      value: -2.758
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: b61052a636a69664fae6e6737a2a10d0, type: 3}
       propertyPath: m_LocalPosition.z
