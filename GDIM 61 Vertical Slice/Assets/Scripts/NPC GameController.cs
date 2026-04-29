@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCGameController : MonoBehaviour
@@ -22,11 +23,24 @@ public class NPCGameController : MonoBehaviour
     readonly bool[] _slotOccupied = new bool[MaxNPCs];
     int _activeCount;
     Transform _runtimeSpawn;
+    GameObject[] _prefabPool;
 
     void Start()
     {
         SetupSpawnPoint();
+        BuildPrefabPool();
         StartCoroutine(SpawnLoop());
+    }
+
+    void BuildPrefabPool()
+    {
+        // Pick up every NPC prefab dropped under Assets/Resources/NPCs.
+        var loaded = Resources.LoadAll<GameObject>("NPCs");
+        var list = new List<GameObject>();
+        if (loaded != null) list.AddRange(loaded);
+        if (_npcPrefab != null && !list.Contains(_npcPrefab)) list.Add(_npcPrefab);
+        _prefabPool = list.ToArray();
+        Debug.Log("[NPCGameController] Loaded " + _prefabPool.Length + " NPC prefabs");
     }
 
     void SetupSpawnPoint()
@@ -46,9 +60,7 @@ public class NPCGameController : MonoBehaviour
 
     IEnumerator SpawnLoop()
     {
-        // Spawn first NPC immediately
         TrySpawnNPC();
-
         while (true)
         {
             yield return new WaitForSeconds(Random.Range(MinInterval, MaxInterval));
@@ -58,31 +70,54 @@ public class NPCGameController : MonoBehaviour
 
     void TrySpawnNPC()
     {
-        if (_npcPrefab == null || _activeCount >= MaxNPCs) return;
+        if (_prefabPool == null || _prefabPool.Length == 0 || _activeCount >= MaxNPCs) return;
 
         int slot = GetFreeSlot();
         if (slot < 0) return;
+
+        GameObject prefab = _prefabPool[Random.Range(0, _prefabPool.Length)];
 
         Vector3 jitter = new Vector3(Random.Range(-0.4f, 0.4f), Random.Range(-0.5f, 0.5f), 0f);
         GameObject destGo = new GameObject("NPC Dest " + slot);
         destGo.transform.position = Slots[slot] + jitter;
 
-        GameObject npcObj = Instantiate(_npcPrefab, _runtimeSpawn.position, Quaternion.identity);
-        NPC npc = npcObj.GetComponent<NPC>();
-        if (npc == null) { Destroy(npcObj); Destroy(destGo); return; }
+        GameObject npcObj = Instantiate(prefab, _runtimeSpawn.position, Quaternion.identity);
+        NPC npc = npcObj.GetComponent<NPC>() ?? npcObj.AddComponent<NPC>();
 
         npc.SetDestination(destGo.transform);
         npc.SetExitPoint(_runtimeSpawn);
         npc.OnLeft = () => FreeSlot(slot, destGo);
 
-        if (npcObj.GetComponent<Collider2D>() == null)
+        // Add the collider on the SpriteRenderer's GameObject so its local space
+        // matches the sprite (for multi-layer aseprite imports the SR sits on a child,
+        // not the root). Click handler resolves the NPC via GetComponentInParent.
+        SpriteRenderer npcSr = npcObj.GetComponent<SpriteRenderer>()
+                            ?? npcObj.GetComponentInChildren<SpriteRenderer>();
+        if (npcSr != null && npcSr.sprite != null && npcSr.GetComponent<Collider2D>() == null)
         {
-            BoxCollider2D col = npcObj.AddComponent<BoxCollider2D>();
-            SpriteRenderer sr = npcObj.GetComponent<SpriteRenderer>()
-                             ?? npcObj.GetComponentInChildren<SpriteRenderer>();
-            if (sr != null && sr.sprite != null)
-                col.size = sr.sprite.bounds.size;
+            BoxCollider2D col = npcSr.gameObject.AddComponent<BoxCollider2D>();
+            col.size = npcSr.sprite.bounds.size;
+            col.offset = npcSr.sprite.bounds.center;
+
+            string srLoc = (npcSr.transform == npcObj.transform) ? "root" : ("child:" + npcSr.gameObject.name);
+            Debug.Log("[NPCGameController] Spawned " + npcObj.name + " (" + prefab.name + ") at " + npcObj.transform.position
+                + " — SR on " + srLoc + ", lossyScale=" + npcSr.transform.lossyScale
+                + ", sprite.bounds.size=" + npcSr.sprite.bounds.size
+                + ", sprite.bounds.center=" + npcSr.sprite.bounds.center);
         }
+        else
+        {
+            Debug.LogWarning("[NPCGameController] Spawned " + npcObj.name + " but did NOT add collider"
+                + " (sr=" + (npcSr != null) + ", sprite=" + (npcSr != null && npcSr.sprite != null)
+                + ", existingCollider=" + (npcSr != null && npcSr.GetComponent<Collider2D>() != null) + ")");
+        }
+
+        // Force NPC visuals above the room background. NPC 2.prefab has no
+        // sortingOrder override and would otherwise render at 0 (below the room).
+        foreach (var sg in npcObj.GetComponentsInChildren<UnityEngine.Rendering.SortingGroup>(true))
+            sg.sortingOrder = Mathf.Max(sg.sortingOrder, 10);
+        foreach (var renderer in npcObj.GetComponentsInChildren<SpriteRenderer>(true))
+            renderer.sortingOrder = Mathf.Max(renderer.sortingOrder, 10);
 
         _slotOccupied[slot] = true;
         _activeCount++;

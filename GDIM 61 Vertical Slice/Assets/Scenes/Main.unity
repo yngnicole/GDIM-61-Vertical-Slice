@@ -1373,7 +1373,7 @@ GameObject:
   - component: {fileID: 887905985}
   - component: {fileID: 887905984}
   m_Layer: 5
-  m_Name: coffee pot
+  m_Name: Coffee machine blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

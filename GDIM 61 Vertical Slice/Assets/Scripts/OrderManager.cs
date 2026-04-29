@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class OrderManager : MonoBehaviour
@@ -8,23 +8,27 @@ public class OrderManager : MonoBehaviour
 
     [Header("Money")]
     [SerializeField] int _startingMoney = 50;
-    [SerializeField] int _moneyPerOrder = 10;
+
+    const int BlueBrewCost = 5;
+    const int RedBrewCost = 3;
+    const int BlueSellPrice = 15;
+    const int RedSellPrice = 10;
+    const int AbandonPenalty = 1;
+
+    enum HandState { Empty, HoldingBlue, HoldingRed }
+    HandState _hand = HandState.Empty;
 
     int _money;
     public int Money => _money;
+    public bool HoldingDrink => _hand != HandState.Empty;
 
-    enum HandState { Empty, HoldingOrder, HoldingCoffee }
-    HandState _hand = HandState.Empty;
-    NPC _handNPC; // NPC whose order/coffee is in hand
+    Text _moneyText;
+    int _lastDelta;
+    float _deltaShowUntil;
+    const float DeltaDisplaySeconds = 1.5f;
 
-    // Tracks which NPC each machine is brewing for
-    readonly Dictionary<CoffeeMachine, NPC> _brewingFor = new Dictionary<CoffeeMachine, NPC>();
-
-    Text _moneyText, _statusText;
-
-    // AutoTester helpers
-    public NPC ActiveNPC => _handNPC;
-    public bool HoldingDrink => _hand == HandState.HoldingCoffee;
+    GameObject _handIcon;
+    SpriteRenderer _handIconSr;
 
     void Awake()
     {
@@ -35,140 +39,193 @@ public class OrderManager : MonoBehaviour
 
     void Update()
     {
-        UpdateStatusUI();
-        if (Input.GetMouseButtonDown(0))
-            HandleClick();
+        // Re-render every frame so the delta clears itself once the window expires.
+        UpdateMoneyUI();
+        UpdateHandIcon();
+        if (Input.GetMouseButtonDown(0)) HandleClick();
     }
 
     void HandleClick()
     {
-        UnityEngine.Camera cam = UnityEngine.Camera.main;
-        if (cam == null) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            Debug.Log("[OrderManager] click swallowed by UI");
+            return;
+        }
+
+        var cam = UnityEngine.Camera.main;
+        if (cam == null) { Debug.LogWarning("[OrderManager] no Camera.main"); return; }
 
         Vector2 point = cam.ScreenToWorldPoint(Input.mousePosition);
         Collider2D[] hits = Physics2D.OverlapPointAll(point);
+        Debug.Log("[OrderManager] click at " + point + " hand=" + _hand + " hits=" + hits.Length);
         if (hits.Length == 0) return;
 
         foreach (Collider2D hit in hits)
         {
             GameObject obj = hit.gameObject;
+            Debug.Log("[OrderManager]   hit: '" + obj.name + "' parent='" + (obj.transform.parent != null ? obj.transform.parent.name : "(none)") + "'"
+                + " hasNPC=" + (obj.GetComponent<NPC>() != null) + " hasNPCInParent=" + (obj.GetComponentInParent<NPC>() != null)
+                + " hasMachine=" + (obj.GetComponent<CoffeeMachine>() != null) + " hasMachineInParent=" + (obj.GetComponentInParent<CoffeeMachine>() != null)
+                + " hasBubble=" + (obj.GetComponent<OrderBubble>() != null) + " hasBubbleInParent=" + (obj.GetComponentInParent<OrderBubble>() != null));
 
-            // Click NPC bubble while hand is empty → take order
-            OrderBubble bubble = obj.GetComponent<OrderBubble>()
-                              ?? obj.GetComponentInParent<OrderBubble>();
-            if (bubble != null && bubble.Owner != null && _hand == HandState.Empty)
-            {
-                TakeOrder(bubble.Owner);
-                bubble.OnOrderTaken();
-                return;
-            }
+            // Bubble has no collider, but be defensive in case one is added later —
+            // a bubble click should never deliver.
+            if (obj.GetComponent<OrderBubble>() != null
+                || obj.GetComponentInParent<OrderBubble>() != null) continue;
 
-            // Click machine while holding an order → start brewing
             CoffeeMachine machine = obj.GetComponent<CoffeeMachine>()
                                  ?? obj.GetComponentInParent<CoffeeMachine>();
             if (machine != null)
             {
-                if (_hand == HandState.HoldingOrder
-                    && !machine.IsBrewing && !machine.IsDrinkReady)
-                {
-                    StartBrewing(machine);
-                    return;
-                }
-
-                // Click done machine while hand is empty → pick up coffee
-                if (_hand == HandState.Empty && machine.IsDrinkReady
-                    && _brewingFor.TryGetValue(machine, out NPC forNPC))
-                {
-                    _hand = HandState.HoldingCoffee;
-                    _handNPC = forNPC;
-                    _brewingFor.Remove(machine);
-                    machine.OnPickedUp();
-                    return;
-                }
+                if (HandleMachineClick(machine)) return;
+                continue;
             }
 
-            // Click NPC while holding matching coffee → deliver
             NPC npc = obj.GetComponent<NPC>() ?? obj.GetComponentInParent<NPC>();
-            if (npc != null && _hand == HandState.HoldingCoffee && npc == _handNPC)
-            {
-                FulfillOrder(npc);
-                return;
-            }
+            if (npc != null && TryDeliver(npc)) return;
         }
     }
 
-    // ── Public API (also used by AutoTester) ────────────────────────────────
-
-    public void TakeOrder(NPC npc)
+    bool HandleMachineClick(CoffeeMachine machine)
     {
-        if (_hand != HandState.Empty) return;
-        _hand = HandState.HoldingOrder;
-        _handNPC = npc;
+        // Pick up: only when hand is empty and a drink is ready.
+        if (_hand == HandState.Empty && machine.IsDrinkReady)
+        {
+            _hand = machine.MachineColor == OrderType.Blue
+                ? HandState.HoldingBlue
+                : HandState.HoldingRed;
+            machine.OnPickedUp();
+            return true;
+        }
+
+        // Brew: allowed even while holding a drink — keeps machines busy in parallel.
+        if (!machine.IsBrewing && !machine.IsDrinkReady)
+        {
+            int cost = machine.MachineColor == OrderType.Blue ? BlueBrewCost : RedBrewCost;
+            if (TrySpendMoney(cost)) machine.StartBrewing();
+            return true;
+        }
+
+        return false;
     }
 
-    public void StartBrewing(CoffeeMachine machine)
+    bool TryDeliver(NPC npc)
     {
-        if (machine == null || _hand != HandState.HoldingOrder) return;
-        if (machine.IsBrewing || machine.IsDrinkReady) return;
-        _brewingFor[machine] = _handNPC;
+        if (_hand == HandState.Empty)
+        {
+            Debug.Log("[OrderManager] click NPC '" + npc.gameObject.name + "' but hand is empty");
+            return false;
+        }
+        if (!npc.OrderActive)
+        {
+            Debug.Log("[OrderManager] click NPC '" + npc.gameObject.name + "' but order not active");
+            return false;
+        }
+
+        bool match = (_hand == HandState.HoldingBlue && npc.OrderType == OrderType.Blue)
+                  || (_hand == HandState.HoldingRed && npc.OrderType == OrderType.Red);
+        if (!match)
+        {
+            Debug.Log("[OrderManager] color mismatch — hand=" + _hand + " order=" + npc.OrderType);
+            return false;
+        }
+
+        int reward = npc.OrderType == OrderType.Blue ? BlueSellPrice : RedSellPrice;
+        _money += reward;
+        ShowDelta(reward);
         _hand = HandState.Empty;
-        _handNPC = null;
-        machine.StartBrewing();
-    }
-
-    // Pick up from a specific machine (used by AutoTester)
-    public void PickUpFrom(CoffeeMachine machine)
-    {
-        if (machine == null || !machine.IsDrinkReady) return;
-        if (!_brewingFor.TryGetValue(machine, out NPC forNPC)) return;
-        _hand = HandState.HoldingCoffee;
-        _handNPC = forNPC;
-        _brewingFor.Remove(machine);
-        machine.OnPickedUp();
-    }
-
-    public void FulfillOrder(NPC npc)
-    {
-        if (_hand != HandState.HoldingCoffee || npc != _handNPC) return;
-        _hand = HandState.Empty;
-        _handNPC = null;
-        _money += _moneyPerOrder;
-        UpdateMoneyUI();
         npc.OrderFulfilled();
+        return true;
     }
-
-    public void OnBrewingComplete() { }
 
     public bool TrySpendMoney(int amount)
     {
         if (_money < amount) return false;
         _money -= amount;
-        UpdateMoneyUI();
+        ShowDelta(-amount);
         return true;
     }
 
-    public void SetMoneyText(Text text) { _moneyText = text; UpdateMoneyUI(); }
-    public void SetStatusText(Text text) { _statusText = text; }
+    public void OnNPCAbandoned()
+    {
+        _money -= AbandonPenalty;
+        ShowDelta(-AbandonPenalty);
+    }
+
+    void ShowDelta(int amount)
+    {
+        if (amount == 0) return;
+        _lastDelta = amount;
+        _deltaShowUntil = Time.time + DeltaDisplaySeconds;
+    }
+
+    public void OnBrewingComplete() { }
+
+    void UpdateHandIcon()
+    {
+        if (_hand == HandState.Empty)
+        {
+            if (_handIcon != null) { Destroy(_handIcon); _handIcon = null; _handIconSr = null; }
+            return;
+        }
+
+        if (_handIcon == null) CreateHandIcon();
+        if (_handIcon == null) return;
+
+        if (_handIconSr != null)
+        {
+            _handIconSr.color = _hand == HandState.HoldingBlue
+                ? new Color(0.45f, 0.7f, 1f)
+                : new Color(1f, 0.5f, 0.5f);
+        }
+
+        var cam = UnityEngine.Camera.main;
+        if (cam != null)
+        {
+            Vector3 worldPos = cam.ScreenToWorldPoint(Input.mousePosition);
+            worldPos.z = 0f;
+            _handIcon.transform.position = worldPos;
+        }
+    }
+
+    void CreateHandIcon()
+    {
+        if (GameController.Instance == null || GameController.Instance.CoffeeIconPrefab == null) return;
+        _handIcon = Instantiate(GameController.Instance.CoffeeIconPrefab);
+        _handIcon.name = "HandCoffeeIcon";
+        // Strip colliders so the icon doesn't catch clicks meant for the world.
+        foreach (var c in _handIcon.GetComponentsInChildren<Collider2D>(true)) Destroy(c);
+        _handIconSr = _handIcon.GetComponent<SpriteRenderer>()
+                   ?? _handIcon.GetComponentInChildren<SpriteRenderer>();
+        if (_handIconSr != null) _handIconSr.sortingOrder = 200;
+        _handIcon.transform.localScale = Vector3.one * 0.5f;
+    }
+
+    public void SetMoneyText(Text text)
+    {
+        _moneyText = text;
+        if (_moneyText != null) _moneyText.supportRichText = true;
+        UpdateMoneyUI();
+    }
 
     void UpdateMoneyUI()
     {
-        if (_moneyText != null) _moneyText.text = "$" + _money;
-    }
+        if (_moneyText == null) return;
 
-    void UpdateStatusUI()
-    {
-        if (_statusText == null) return;
-        switch (_hand)
+        bool showDelta = Time.time < _deltaShowUntil && _lastDelta != 0;
+        string moneyPart = "<color=#FFFF00>Money: $" + _money + "</color>";
+
+        if (showDelta)
         {
-            case HandState.Empty:
-                _statusText.text = "Click the order icon above an NPC";
-                break;
-            case HandState.HoldingOrder:
-                _statusText.text = "Click a coffee machine to brew";
-                break;
-            case HandState.HoldingCoffee:
-                _statusText.text = "Click the NPC to deliver";
-                break;
+            string color = _lastDelta > 0 ? "#33FF33" : "#FF6666";
+            string sign = _lastDelta > 0 ? "+$" : "-$";
+            string deltaPart = "<color=" + color + ">" + sign + Mathf.Abs(_lastDelta) + "</color>";
+            _moneyText.text = deltaPart + " (" + moneyPart + ")";
+        }
+        else
+        {
+            _moneyText.text = moneyPart;
         }
     }
 }
