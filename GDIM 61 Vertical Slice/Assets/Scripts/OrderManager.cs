@@ -89,8 +89,8 @@ public class OrderManager : MonoBehaviour
 
     bool HandleMachineClick(CoffeeMachine machine)
     {
-        // Pick up: only when hand is empty and a drink is ready.
-        if (_hand == HandState.Empty && machine.IsDrinkReady)
+        // Pick up a ready drink. If we're already holding one, drop it and take the new one.
+        if (machine.IsDrinkReady)
         {
             _hand = machine.MachineColor == OrderType.Blue
                 ? HandState.HoldingBlue

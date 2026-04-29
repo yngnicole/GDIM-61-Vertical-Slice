@@ -4,7 +4,8 @@ public class ShopUI : MonoBehaviour
 {
     public static ShopUI Instance { get; private set; }
 
-    const int CoffeeMachineCost = 30;
+    const int RedMachineCost = 30;
+    const int BlueMachineCost = 50;
 
     void Awake() => Instance = this;
 
@@ -15,8 +16,9 @@ public class ShopUI : MonoBehaviour
 
     public void BuyCoffeeMachine(Sprite machineSprite, OrderType color)
     {
+        int cost = color == OrderType.Blue ? BlueMachineCost : RedMachineCost;
         if (OrderManager.Instance != null
-            && OrderManager.Instance.TrySpendMoney(CoffeeMachineCost))
+            && OrderManager.Instance.TrySpendMoney(cost))
         {
             PlaceNewMachine(machineSprite, color);
         }
