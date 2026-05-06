@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: d1eb3d426be801c43b565b068a600174
+guid: d6255d5c16ef2ab408d8a1a1c276452d
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -122,9 +122,9 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: cafe_bg_temp
+  - name: cafe_bg_temp_2
     originalName: 
-    pivot: {x: 0.49844238, y: 0.15277778}
+    pivot: {x: 0.49844238, y: 0.03181818}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
@@ -132,8 +132,8 @@ ScriptedImporter:
       x: 4
       y: 4
       width: 321
-      height: 288
-    spriteID: 007237ff3dc8e2a41be51b399f0d49d0
+      height: 220
+    spriteID: d11851dd9d9477f4898b6c8f0bb6f654
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -146,25 +146,25 @@ ScriptedImporter:
   asepriteLayers:
   - layerIndex: 0
     uuid:
-      value0: 4263568270
+      value0: 4253585253
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: cafe_bg_temp
+    name: cafe_bg_temp_2
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: cafe_bg_temp
+    - name: cafe_bg_temp_2
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
         x: 0
-        y: -44
+        y: -7
         width: 321
-        height: 288
-      spriteId: 007237ff3dc8e2a41be51b399f0d49d0
+        height: 220
+      spriteId: d11851dd9d9477f4898b6c8f0bb6f654
     linkedCells: []
     parentIndex: -1
   platformSettings:
@@ -184,4 +184,4 @@ ScriptedImporter:
   secondarySpriteTextures: []
   spritePackingTag: 
   canvasSize: {x: 320, y: 200}
-  previousTextureSize: {x: 512, y: 512}
+  previousTextureSize: {x: 512, y: 256}
