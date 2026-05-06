@@ -333,7 +333,7 @@ GameObject:
   - component: {fileID: 216830596}
   - component: {fileID: 216830595}
   - component: {fileID: 216830594}
-  m_Layer: 6
+  m_Layer: 31
   m_Name: Shop icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -347,7 +347,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 216830592}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -356,7 +356,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 420, y: -234}
+  m_AnchoredPosition: {x: 419.99982, y: -233.99974}
   m_SizeDelta: {x: 73.66, y: 73.66}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &216830594
@@ -1465,9 +1465,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1484461324}
   - {fileID: 1466043737}
   - {fileID: 791010610}
-  - {fileID: 1484461324}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &791010610 stripped
@@ -2502,21 +2502,25 @@ PrefabInstance:
       propertyPath: m_Name
       value: cafe_bg_temp_2
       objectReference: {fileID: 0}
+    - target: {fileID: -2253911629886400664, guid: d6255d5c16ef2ab408d8a1a1c276452d, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: d6255d5c16ef2ab408d8a1a1c276452d, type: 3}
       propertyPath: m_LocalScale.x
-      value: 6.0672727
+      value: 6.067273
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: d6255d5c16ef2ab408d8a1a1c276452d, type: 3}
       propertyPath: m_LocalScale.y
-      value: 6.0672727
+      value: 6.067273
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: d6255d5c16ef2ab408d8a1a1c276452d, type: 3}
       propertyPath: m_LocalScale.z
-      value: 6.0672727
+      value: 6.067273
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: d6255d5c16ef2ab408d8a1a1c276452d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.683181
+      value: 0.6831808
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: d6255d5c16ef2ab408d8a1a1c276452d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3367,8 +3371,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 792825896}
-  - {fileID: 819846193}
   - {fileID: 216830593}
+  - {fileID: 819846193}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3585,9 +3589,9 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 519420032}
-  - {fileID: 1916700906}
   - {fileID: 640620899}
   - {fileID: 691222697}
+  - {fileID: 1916700906}
   - {fileID: 1899495819}
   - {fileID: 958720640}
   - {fileID: 1624527897}
