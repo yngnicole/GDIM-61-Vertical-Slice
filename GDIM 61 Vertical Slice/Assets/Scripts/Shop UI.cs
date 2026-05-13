@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ShopUI : MonoBehaviour
@@ -8,6 +9,21 @@ public class ShopUI : MonoBehaviour
     public const int BlueMachineCost = 50;
     public const int MuffinCost = 10;
     public const int CakeCost = 20;
+
+    public const string BlueMachineId = "blue machine";
+    public const string RedMachineId  = "red machine";
+    public const string MuffinId      = "muffin";
+    public const string CakeId        = "cake";
+
+    static readonly HashSet<string> _purchased = new HashSet<string>();
+
+    public static bool IsPurchased(string itemId)
+        => !string.IsNullOrEmpty(itemId) && _purchased.Contains(itemId);
+
+    public static void MarkPurchased(string itemId)
+    {
+        if (!string.IsNullOrEmpty(itemId)) _purchased.Add(itemId);
+    }
 
     public static int CostFor(OrderType color)
         => color == OrderType.Blue ? BlueMachineCost : RedMachineCost;
@@ -28,6 +44,20 @@ public class ShopUI : MonoBehaviour
         return 0;
     }
 
+    // Maps a GameObject/sprite name onto a canonical item id used by the
+    // purchased-registry and price tags.
+    public static string IdFor(string identifier)
+    {
+        if (string.IsNullOrEmpty(identifier)) return null;
+        string n = identifier.ToLower();
+        if (n.Contains("coffee machine") || n.Contains("coffee_machine")
+            || n.Contains("coffee pot") || n.Contains("coffee_pot"))
+            return (n.Contains("blue") || n.Contains("pot")) ? BlueMachineId : RedMachineId;
+        if (n.Contains("muffin")) return MuffinId;
+        if (n.Contains("cake"))   return CakeId;
+        return null;
+    }
+
     void Awake() => Instance = this;
 
     public void OpenShop() => gameObject.SetActive(true);
@@ -37,11 +67,15 @@ public class ShopUI : MonoBehaviour
 
     public void BuyCoffeeMachine(Sprite machineSprite, OrderType color)
     {
+        string id = color == OrderType.Blue ? BlueMachineId : RedMachineId;
+        if (IsPurchased(id)) { CloseShop(); return; }
+
         int cost = CostFor(color);
         if (OrderManager.Instance != null
             && OrderManager.Instance.TrySpendMoney(cost))
         {
             PlaceNewMachine(machineSprite, color);
+            MarkPurchased(id);
         }
         CloseShop();
     }

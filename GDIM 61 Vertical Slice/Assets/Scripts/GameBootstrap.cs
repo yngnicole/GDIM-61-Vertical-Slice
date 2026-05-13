@@ -14,6 +14,7 @@ public static class GameBootstrap
         RemovePreplacedObjects();
         SetupOrderManager();
         SetupCoffeeMachines();
+        MarkExistingMachinesPurchased();
         SetupUI();
         SetupAutoTester();
         SetupShop();
@@ -82,6 +83,19 @@ public static class GameBootstrap
                 + " at " + sr.transform.position);
         }
         Debug.Log("[Bootstrap] Set up " + count + " coffee machines");
+    }
+
+    static void MarkExistingMachinesPurchased()
+    {
+        // Any machine already in the scene at start counts as "owned" so the
+        // shop won't let the player buy a duplicate of its color.
+        foreach (CoffeeMachine cm in Object.FindObjectsOfType<CoffeeMachine>())
+        {
+            string id = cm.MachineColor == OrderType.Blue
+                ? ShopUI.BlueMachineId : ShopUI.RedMachineId;
+            ShopUI.MarkPurchased(id);
+            Debug.Log("[Bootstrap] Marked '" + id + "' as already owned (starter machine)");
+        }
     }
 
     static OrderType InferMachineColor(SpriteRenderer sr)
@@ -257,9 +271,10 @@ public static class GameBootstrap
             // — the items inside the slot boxes are often unnamed "Image" objects.
             string objName = img.gameObject.name;
             string spriteName = img.sprite != null ? img.sprite.name : "";
+            string itemId = ShopUI.IdFor(objName) ?? ShopUI.IdFor(spriteName);
             int cost = ShopUI.CostFor(objName);
             if (cost == 0) cost = ShopUI.CostFor(spriteName);
-            if (cost == 0) continue;
+            if (cost == 0 || itemId == null) continue;
 
             string lower = (objName + " " + spriteName).ToLower();
             bool isMachine = lower.Contains("coffee machine") || lower.Contains("coffee_machine")
@@ -276,14 +291,14 @@ public static class GameBootstrap
             }
             // Muffin/cake: price-tag only — no buy handler yet.
 
-            AddPriceTag(img.gameObject, cost, font);
+            AddPriceTag(img.gameObject, itemId, cost, font);
 
             Debug.Log("[Bootstrap] Wired shop item: " + objName
-                + " (sprite=" + spriteName + ") cost=$" + cost);
+                + " (sprite=" + spriteName + ", id=" + itemId + ") cost=$" + cost);
         }
     }
 
-    static void AddPriceTag(GameObject iconGo, int cost, Font font)
+    static void AddPriceTag(GameObject iconGo, string itemId, int cost, Font font)
     {
         Transform existing = iconGo.transform.Find("PriceTag");
         if (existing != null) Object.Destroy(existing.gameObject);
@@ -311,9 +326,10 @@ public static class GameBootstrap
         outline.effectColor = Color.black;
         outline.effectDistance = new Vector2(1.5f, -1.5f);
 
-        // PriceTagUpdater paints the label green/red based on current money.
+        // PriceTagUpdater paints the label green/red based on current money,
+        // or "exists" in red once the item has been purchased.
         PriceTagUpdater updater = tagGo.AddComponent<PriceTagUpdater>();
-        updater.Init(cost, label);
+        updater.Init(itemId, cost, label);
     }
 
     static Button FindButtonInCanvas(GameObject canvasGo, string name)
