@@ -30,11 +30,20 @@ public class NPCGameController : MonoBehaviour
     int _activeCount;
     Transform _runtimeSpawn;
     GameObject[] _prefabPool;
+    bool _spawningStarted;
 
     void Start()
     {
         SetupSpawnPoint();
         BuildPrefabPool();
+        // Spawning is gated behind BeginSpawning() so the Start Game button
+        // controls when NPCs actually start coming in.
+    }
+
+    public void BeginSpawning()
+    {
+        if (_spawningStarted) return;
+        _spawningStarted = true;
         StartCoroutine(SpawnLoop());
     }
 

@@ -18,6 +18,7 @@ public static class GameBootstrap
         SetupUI();
         SetupAutoTester();
         SetupShop();
+        SetupStartGame();
         Debug.Log("[Bootstrap] Setup complete! Press T to run automated test.");
     }
 
@@ -362,6 +363,55 @@ public static class GameBootstrap
         GameObject go = new GameObject("AutoTester");
         go.AddComponent<AutoTester>();
         Debug.Log("[Bootstrap] AutoTester created. Press T to run automated test.");
+    }
+
+    static void SetupStartGame()
+    {
+        // Locate the in-scene "Start Game" panel (active by default in the
+        // scene). Search includes inactive in case the user toggled it off.
+        GameObject startPanel = null;
+        foreach (Transform t in Object.FindObjectsOfType<Transform>(true))
+        {
+            if (t.gameObject.name == "Start Game") { startPanel = t.gameObject; break; }
+        }
+        if (startPanel == null)
+        {
+            Debug.LogWarning("[Bootstrap] 'Start Game' panel not found — NPCs will not spawn");
+            return;
+        }
+
+        // Make sure the panel is visible at game start.
+        startPanel.SetActive(true);
+
+        Button startBtn = FindButtonInPanel(startPanel, "start button");
+        if (startBtn == null)
+        {
+            // Fallback: first Button anywhere under the panel.
+            startBtn = startPanel.GetComponentInChildren<Button>(true);
+        }
+        if (startBtn == null)
+        {
+            Debug.LogWarning("[Bootstrap] No Button found under 'Start Game'");
+            return;
+        }
+
+        startBtn.onClick.RemoveAllListeners();
+        startBtn.onClick.AddListener(() =>
+        {
+            NPCGameController npcCtrl = Object.FindObjectOfType<NPCGameController>();
+            if (npcCtrl != null) npcCtrl.BeginSpawning();
+            startPanel.SetActive(false);
+            Debug.Log("[Bootstrap] Start button clicked — NPCs incoming");
+        });
+
+        Debug.Log("[Bootstrap] Wired Start button");
+    }
+
+    static Button FindButtonInPanel(GameObject panel, string name)
+    {
+        foreach (Button btn in panel.GetComponentsInChildren<Button>(true))
+            if (btn.gameObject.name == name) return btn;
+        return null;
     }
 
     static Text CreateText(Transform parent, string name,
