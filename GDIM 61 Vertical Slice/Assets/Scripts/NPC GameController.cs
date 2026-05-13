@@ -6,18 +6,21 @@ public class NPCGameController : MonoBehaviour
 {
     [SerializeField] GameObject _npcPrefab;
     [SerializeField] Transform _spawnPoint;
+    static readonly Vector3 DoorPosition = new Vector3(-3.5f, -1.1f, 0f);
 
     const int MaxNPCs = 5;
     const float MinInterval = 1f;
     const float MaxInterval = 5f;
 
+    // Slots form a queue extending to the lower-right of the door at (-3.5, -1.1).
+    // Slot 0 is closest to the door; later slots are further right.
     static readonly Vector3[] Slots = new Vector3[]
     {
-        new Vector3(-5f,  -3.5f, 0f),
-        new Vector3(-3.5f, -3.5f, 0f),
-        new Vector3(-2f,  -3.5f, 0f),
-        new Vector3(-0.5f, -3.5f, 0f),
-        new Vector3( 1f,  -3.5f, 0f),
+        new Vector3(-2.5f, -2f, 0f),
+        new Vector3(-1f,   -2.2f, 0f),
+        new Vector3( 0.5f, -2.4f, 0f),
+        new Vector3( 1.5f, -3.5f, 0f),
+        new Vector3( 2.2f, -4f, 0f),
     };
 
     readonly bool[] _slotOccupied = new bool[MaxNPCs];
@@ -45,17 +48,11 @@ public class NPCGameController : MonoBehaviour
 
     void SetupSpawnPoint()
     {
-        bool isUI = _spawnPoint != null && _spawnPoint.GetComponentInParent<Canvas>() != null;
-        if (isUI || _spawnPoint == null)
-        {
-            GameObject go = new GameObject("NPC Spawn (World)");
-            go.transform.position = new Vector3(-8f, -4f, 0f);
-            _runtimeSpawn = go.transform;
-        }
-        else
-        {
-            _runtimeSpawn = _spawnPoint;
-        }
+        // Always spawn at the hardcoded door position — ignore _spawnPoint
+        // so Inspector values can't drift away from the door.
+        GameObject go = new GameObject("Door (NPC Spawn)");
+        go.transform.position = DoorPosition;
+        _runtimeSpawn = go.transform;
     }
 
     IEnumerator SpawnLoop()
