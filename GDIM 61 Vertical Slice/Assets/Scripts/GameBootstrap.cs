@@ -216,14 +216,9 @@ public static class GameBootstrap
             buyBtn.onClick.AddListener(shopUI.BuyCoffeeMachine);
         }
 
-        // Make sure the red icon exists in the right slot. The blue one was renamed
-        // from "coffee pot" in the scene; the red one is cloned at runtime so the
-        // scene only needs one icon authored.
-        EnsureMachineIcon(shopCanvasGo, "Coffee machine red", new Vector2(174.8f, 125.6f));
-
-        // Wire any "Coffee machine ..." shop icon (e.g. blue, red) to spawn
-        // a machine with that icon's own sprite — no per-color hard-coding.
-        WireMachineIcons(shopCanvasGo, shopUI);
+        // Wire every shop item (machines, muffin, cake, …) — add a price tag,
+        // and a buy handler for the ones we know how to "use".
+        WireShopItems(shopCanvasGo, shopUI);
     }
 
     static void ScaleShopContents(GameObject shopCanvasGo, float scale)
@@ -251,56 +246,74 @@ public static class GameBootstrap
             if (child != null) child.SetParent(wrapper, false);
     }
 
-    static void EnsureMachineIcon(GameObject shopCanvasGo, string targetName, Vector2 anchoredPos)
+    static void WireShopItems(GameObject shopCanvasGo, ShopUI shopUI)
     {
-        UnityEngine.UI.Image template = null;
+        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
+                 ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+
         foreach (UnityEngine.UI.Image img in shopCanvasGo.GetComponentsInChildren<UnityEngine.UI.Image>(true))
         {
-            if (img.gameObject.name == targetName) return; // already exists
-            string lower = img.gameObject.name.ToLower();
-            if (template == null && (lower.Contains("coffee machine") || lower.Contains("coffee_machine")))
-                template = img;
+            // Identify by GameObject name first, then fall back to the sprite name
+            // — the items inside the slot boxes are often unnamed "Image" objects.
+            string objName = img.gameObject.name;
+            string spriteName = img.sprite != null ? img.sprite.name : "";
+            int cost = ShopUI.CostFor(objName);
+            if (cost == 0) cost = ShopUI.CostFor(spriteName);
+            if (cost == 0) continue;
+
+            string lower = (objName + " " + spriteName).ToLower();
+            bool isMachine = lower.Contains("coffee machine") || lower.Contains("coffee_machine")
+                          || lower.Contains("coffee pot") || lower.Contains("coffee_pot");
+            if (isMachine)
+            {
+                Sprite sprite = img.sprite;
+                OrderType color = (lower.Contains("blue") || lower.Contains("pot"))
+                    ? OrderType.Blue : OrderType.Red;
+                Button btn = img.GetComponent<Button>() ?? img.gameObject.AddComponent<Button>();
+                btn.targetGraphic = img;
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => shopUI.BuyCoffeeMachine(sprite, color));
+            }
+            // Muffin/cake: price-tag only — no buy handler yet.
+
+            AddPriceTag(img.gameObject, cost, font);
+
+            Debug.Log("[Bootstrap] Wired shop item: " + objName
+                + " (sprite=" + spriteName + ") cost=$" + cost);
         }
-        if (template == null) return;
-
-        // Red icon uses the in-scene starter machine's sprite (coffee_machine_ase).
-        Sprite spriteForTarget = template.sprite;
-        if (targetName.ToLower().Contains("red"))
-        {
-            CoffeeMachine existing = Object.FindObjectOfType<CoffeeMachine>();
-            SpriteRenderer sr = existing != null
-                ? (existing.GetComponent<SpriteRenderer>() ?? existing.GetComponentInChildren<SpriteRenderer>())
-                : null;
-            if (sr != null && sr.sprite != null) spriteForTarget = sr.sprite;
-        }
-
-        GameObject clone = Object.Instantiate(template.gameObject, template.transform.parent);
-        clone.name = targetName;
-
-        UnityEngine.UI.Image cloneImg = clone.GetComponent<UnityEngine.UI.Image>();
-        if (cloneImg != null) cloneImg.sprite = spriteForTarget;
-
-        RectTransform rt = clone.GetComponent<RectTransform>();
-        if (rt != null) rt.anchoredPosition = anchoredPos;
-
-        Debug.Log("[Bootstrap] Created shop icon: " + targetName);
     }
 
-    static void WireMachineIcons(GameObject shopCanvasGo, ShopUI shopUI)
+    static void AddPriceTag(GameObject iconGo, int cost, Font font)
     {
-        foreach (UnityEngine.UI.Image img in shopCanvasGo.GetComponentsInChildren<UnityEngine.UI.Image>(true))
-        {
-            string lower = img.gameObject.name.ToLower();
-            if (!lower.Contains("coffee machine") && !lower.Contains("coffee_machine")) continue;
+        Transform existing = iconGo.transform.Find("PriceTag");
+        if (existing != null) Object.Destroy(existing.gameObject);
 
-            Sprite sprite = img.sprite;
-            OrderType color = lower.Contains("blue") ? OrderType.Blue : OrderType.Red;
-            Button btn = img.GetComponent<Button>() ?? img.gameObject.AddComponent<Button>();
-            btn.targetGraphic = img;
-            btn.onClick.RemoveAllListeners();
-            btn.onClick.AddListener(() => shopUI.BuyCoffeeMachine(sprite, color));
-            Debug.Log("[Bootstrap] Wired shop icon: " + img.gameObject.name + " (" + color + ")");
-        }
+        GameObject tagGo = new GameObject("PriceTag", typeof(RectTransform));
+        tagGo.transform.SetParent(iconGo.transform, false);
+
+        // Anchored to bottom-center of the icon, sitting just below it.
+        RectTransform rt = tagGo.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0f);
+        rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0f, -4f);
+        rt.sizeDelta = new Vector2(120f, 32f);
+
+        Text label = tagGo.AddComponent<Text>();
+        label.text = "$" + cost;
+        label.alignment = TextAnchor.UpperCenter;
+        label.fontSize = 20;
+        label.fontStyle = FontStyle.Bold;
+        if (font != null) label.font = font;
+        label.raycastTarget = false; // don't intercept the icon's button clicks
+
+        Outline outline = tagGo.AddComponent<Outline>();
+        outline.effectColor = Color.black;
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        // PriceTagUpdater paints the label green/red based on current money.
+        PriceTagUpdater updater = tagGo.AddComponent<PriceTagUpdater>();
+        updater.Init(cost, label);
     }
 
     static Button FindButtonInCanvas(GameObject canvasGo, string name)
