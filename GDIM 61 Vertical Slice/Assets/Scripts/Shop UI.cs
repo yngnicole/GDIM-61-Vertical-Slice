@@ -80,6 +80,67 @@ public class ShopUI : MonoBehaviour
         CloseShop();
     }
 
+    public void BuyFood(Sprite foodSprite, OrderType foodType)
+    {
+        if (foodType != OrderType.Muffin && foodType != OrderType.Cake)
+        {
+            Debug.LogWarning("[ShopUI] BuyFood called with non-food type: " + foodType);
+            CloseShop();
+            return;
+        }
+
+        string id = foodType == OrderType.Muffin ? MuffinId : CakeId;
+        if (IsPurchased(id)) { CloseShop(); return; }
+
+        int cost = foodType == OrderType.Muffin ? MuffinCost : CakeCost;
+        if (OrderManager.Instance != null
+            && OrderManager.Instance.TrySpendMoney(cost))
+        {
+            PlaceNewFoodItem(foodSprite, foodType);
+            MarkPurchased(id);
+        }
+        CloseShop();
+    }
+
+    void PlaceNewFoodItem(Sprite foodSprite, OrderType foodType)
+    {
+        // Anchor placement to the existing coffee machine so food items
+        // sit on the same counter line. Offsets keep muffin/cake distinct.
+        CoffeeMachine anchor = Object.FindObjectOfType<CoffeeMachine>();
+        if (anchor == null)
+        {
+            Debug.LogWarning("[ShopUI] No anchor (CoffeeMachine) to place food next to");
+            return;
+        }
+
+        // Muffin gets a lower z than cake so it renders in front when they overlap.
+        Vector3 offset = foodType == OrderType.Muffin
+            ? new Vector3(-2.25f, -1f, -0.1f)
+            : new Vector3(-3f, -0.6f, 0f);
+
+        GameObject go = new GameObject(foodType + "Display");
+        go.transform.position = anchor.transform.position + offset;
+        // Match the cafe's scale so the food sprite renders at the same size
+        // as the existing coffee machines on the counter.
+        go.transform.localScale = anchor.transform.lossyScale;
+
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = foodSprite;
+        sr.sortingOrder = 10;
+
+        if (foodSprite != null)
+        {
+            BoxCollider2D col = go.AddComponent<BoxCollider2D>();
+            col.size = foodSprite.bounds.size;
+            col.offset = foodSprite.bounds.center;
+        }
+
+        FoodItem food = go.AddComponent<FoodItem>();
+        food.Configure(foodType, foodSprite);
+
+        Debug.Log("[ShopUI] Placed " + foodType + " display at " + go.transform.position);
+    }
+
     void PlaceNewMachine(Sprite machineSprite, OrderType color)
     {
         CoffeeMachine existing = Object.FindObjectOfType<CoffeeMachine>();

@@ -13,18 +13,20 @@ public class GameController : MonoBehaviour
 
     void HandleNPCSpawned(NPC npc)
     {
-        // Only let an NPC order a color the cafe can actually brew.
-        bool hasBlue = false, hasRed = false;
+        // Only let an NPC order something the cafe can actually serve.
+        var available = new System.Collections.Generic.HashSet<OrderType>();
         foreach (CoffeeMachine cm in Object.FindObjectsOfType<CoffeeMachine>())
-        {
-            if (cm.MachineColor == OrderType.Blue) hasBlue = true;
-            else hasRed = true;
-        }
+            available.Add(cm.MachineColor);
+        foreach (FoodItem food in Object.FindObjectsOfType<FoodItem>())
+            available.Add(food.FoodType);
 
-        OrderType pick;
-        if (hasBlue && hasRed) pick = Random.value < 0.5f ? OrderType.Blue : OrderType.Red;
-        else if (hasBlue)      pick = OrderType.Blue;
-        else                   pick = OrderType.Red;
+        OrderType pick = OrderType.Red; // safe fallback — scene always has a red machine
+        if (available.Count > 0)
+        {
+            var arr = new OrderType[available.Count];
+            available.CopyTo(arr);
+            pick = arr[Random.Range(0, arr.Length)];
+        }
 
         npc.AssignOrder(pick);
         npc.OnArrived += () => OnNPCArrived(npc);

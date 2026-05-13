@@ -198,9 +198,9 @@ public static class GameBootstrap
         // Add ShopUI component
         ShopUI shopUI = shopCanvasGo.GetComponent<ShopUI>() ?? shopCanvasGo.AddComponent<ShopUI>();
 
-        // Halve everything inside the shop. Done via a wrapper so we don't have
-        // to touch every child's anchoredPosition + sizeDelta individually.
-        ScaleShopContents(shopCanvasGo, 0.5f);
+        // Scale shop contents via a wrapper so we don't have to touch every
+        // child's anchoredPosition + sizeDelta individually.
+        ScaleShopContents(shopCanvasGo, 0.75f);
 
         // Wire up shop icon button → open shop
         GameObject shopIconGo = GameObject.Find("Shop icon");
@@ -279,17 +279,26 @@ public static class GameBootstrap
             string lower = (objName + " " + spriteName).ToLower();
             bool isMachine = lower.Contains("coffee machine") || lower.Contains("coffee_machine")
                           || lower.Contains("coffee pot") || lower.Contains("coffee_pot");
+            Sprite sprite = img.sprite;
+
+            Button btn = img.GetComponent<Button>() ?? img.gameObject.AddComponent<Button>();
+            btn.targetGraphic = img;
+            btn.onClick.RemoveAllListeners();
+
             if (isMachine)
             {
-                Sprite sprite = img.sprite;
                 OrderType color = (lower.Contains("blue") || lower.Contains("pot"))
                     ? OrderType.Blue : OrderType.Red;
-                Button btn = img.GetComponent<Button>() ?? img.gameObject.AddComponent<Button>();
-                btn.targetGraphic = img;
-                btn.onClick.RemoveAllListeners();
                 btn.onClick.AddListener(() => shopUI.BuyCoffeeMachine(sprite, color));
             }
-            // Muffin/cake: price-tag only — no buy handler yet.
+            else if (itemId == ShopUI.MuffinId)
+            {
+                btn.onClick.AddListener(() => shopUI.BuyFood(sprite, OrderType.Muffin));
+            }
+            else if (itemId == ShopUI.CakeId)
+            {
+                btn.onClick.AddListener(() => shopUI.BuyFood(sprite, OrderType.Cake));
+            }
 
             AddPriceTag(img.gameObject, itemId, cost, font);
 

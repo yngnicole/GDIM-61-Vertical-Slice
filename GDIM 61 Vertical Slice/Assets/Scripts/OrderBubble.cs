@@ -19,9 +19,7 @@ public class OrderBubble : MonoBehaviour
     void ApplyColor()
     {
         if (_spriteRenderer == null || _owner == null) return;
-        _spriteRenderer.color = _owner.OrderType == OrderType.Blue
-            ? new Color(0.45f, 0.7f, 1f)
-            : new Color(1f, 0.5f, 0.5f);
+        _spriteRenderer.color = OrderInfo.Tint(_owner.OrderType);
     }
 
     void Update()

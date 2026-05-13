@@ -11,16 +11,14 @@ public class OrderManager : MonoBehaviour
 
     const int BlueBrewCost = 5;
     const int RedBrewCost = 3;
-    const int BlueSellPrice = 15;
-    const int RedSellPrice = 10;
     const int AbandonPenalty = 1;
 
-    enum HandState { Empty, HoldingBlue, HoldingRed }
-    HandState _hand = HandState.Empty;
+    // null = empty hand; else holding that order type.
+    OrderType? _hand;
 
     int _money;
     public int Money => _money;
-    public bool HoldingDrink => _hand != HandState.Empty;
+    public bool HoldingDrink => _hand.HasValue;
 
     Text _moneyText;
     int _lastDelta;
@@ -29,6 +27,7 @@ public class OrderManager : MonoBehaviour
 
     GameObject _handIcon;
     SpriteRenderer _handIconSr;
+    Sprite _handSpriteOverride; // used when picking up a food item
 
     void Awake()
     {
@@ -82,6 +81,15 @@ public class OrderManager : MonoBehaviour
                 continue;
             }
 
+            FoodItem food = obj.GetComponent<FoodItem>()
+                         ?? obj.GetComponentInParent<FoodItem>();
+            if (food != null)
+            {
+                _hand = food.FoodType;
+                _handSpriteOverride = food.Sprite;
+                return;
+            }
+
             NPC npc = obj.GetComponent<NPC>() ?? obj.GetComponentInParent<NPC>();
             if (npc != null && TryDeliver(npc)) return;
         }
@@ -92,9 +100,8 @@ public class OrderManager : MonoBehaviour
         // Pick up a ready drink. If we're already holding one, drop it and take the new one.
         if (machine.IsDrinkReady)
         {
-            _hand = machine.MachineColor == OrderType.Blue
-                ? HandState.HoldingBlue
-                : HandState.HoldingRed;
+            _hand = machine.MachineColor;
+            _handSpriteOverride = null; // use the default coffee icon
             machine.OnPickedUp();
             return true;
         }
@@ -112,7 +119,7 @@ public class OrderManager : MonoBehaviour
 
     bool TryDeliver(NPC npc)
     {
-        if (_hand == HandState.Empty)
+        if (!_hand.HasValue)
         {
             Debug.Log("[OrderManager] click NPC '" + npc.gameObject.name + "' but hand is empty");
             return false;
@@ -123,18 +130,17 @@ public class OrderManager : MonoBehaviour
             return false;
         }
 
-        bool match = (_hand == HandState.HoldingBlue && npc.OrderType == OrderType.Blue)
-                  || (_hand == HandState.HoldingRed && npc.OrderType == OrderType.Red);
-        if (!match)
+        if (_hand.Value != npc.OrderType)
         {
-            Debug.Log("[OrderManager] color mismatch — hand=" + _hand + " order=" + npc.OrderType);
+            Debug.Log("[OrderManager] order mismatch — hand=" + _hand + " order=" + npc.OrderType);
             return false;
         }
 
-        int reward = npc.OrderType == OrderType.Blue ? BlueSellPrice : RedSellPrice;
+        int reward = OrderInfo.SellPrice(npc.OrderType);
         _money += reward;
         ShowDelta(reward);
-        _hand = HandState.Empty;
+        _hand = null;
+        _handSpriteOverride = null;
         npc.OrderFulfilled();
         return true;
     }
@@ -164,7 +170,7 @@ public class OrderManager : MonoBehaviour
 
     void UpdateHandIcon()
     {
-        if (_hand == HandState.Empty)
+        if (!_hand.HasValue)
         {
             if (_handIcon != null) { Destroy(_handIcon); _handIcon = null; _handIconSr = null; }
             return;
@@ -175,9 +181,16 @@ public class OrderManager : MonoBehaviour
 
         if (_handIconSr != null)
         {
-            _handIconSr.color = _hand == HandState.HoldingBlue
-                ? new Color(0.45f, 0.7f, 1f)
-                : new Color(1f, 0.5f, 0.5f);
+            // Food items carry their own sprite; coffee uses the default icon + tint.
+            if (_handSpriteOverride != null)
+            {
+                _handIconSr.sprite = _handSpriteOverride;
+                _handIconSr.color = Color.white;
+            }
+            else
+            {
+                _handIconSr.color = OrderInfo.Tint(_hand.Value);
+            }
         }
 
         var cam = UnityEngine.Camera.main;

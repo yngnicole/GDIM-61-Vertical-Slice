@@ -29,7 +29,7 @@ public class NPC : MonoBehaviour
     public void AssignOrder(OrderType type)
     {
         _orderType = type;
-        _patienceLeft = type == OrderType.Blue ? 10f : 8f;
+        _patienceLeft = OrderInfo.Patience(type);
     }
 
     public void BeginWaiting()
@@ -50,7 +50,7 @@ public class NPC : MonoBehaviour
             _patienceLeft -= Time.deltaTime;
             if (_timerLabel != null)
             {
-                int price = _orderType == OrderType.Blue ? 15 : 10;
+                int price = OrderInfo.SellPrice(_orderType);
                 _timerLabel.text = Mathf.CeilToInt(Mathf.Max(0f, _patienceLeft)) + "s($" + price + ")";
             }
             if (_patienceLeft <= 0f) GiveUp();
@@ -124,9 +124,7 @@ public class NPC : MonoBehaviour
         _timerLabel.fontSize = 32;
         _timerLabel.anchor = TextAnchor.UpperCenter;
         _timerLabel.alignment = TextAlignment.Center;
-        _timerLabel.color = _orderType == OrderType.Blue
-            ? new Color(0.4f, 0.7f, 1f)
-            : new Color(1f, 0.5f, 0.5f);
+        _timerLabel.color = OrderInfo.Tint(_orderType);
         var mr = go.GetComponent<MeshRenderer>();
         if (mr != null) mr.sortingOrder = 100;
     }
