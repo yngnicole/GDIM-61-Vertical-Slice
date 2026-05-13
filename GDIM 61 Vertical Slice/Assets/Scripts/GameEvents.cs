@@ -21,11 +21,11 @@ public static class OrderInfo
     {
         switch (t)
         {
-            case OrderType.Blue:   return 15;
-            case OrderType.Red:    return 10;
-            case OrderType.Muffin: return 8;
-            case OrderType.Cake:   return 15;
-            default:               return 10;
+            case OrderType.Red:    return 5;
+            case OrderType.Blue:   return 10;
+            case OrderType.Muffin: return 15;
+            case OrderType.Cake:   return 25;
+            default:               return 5;
         }
     }
 

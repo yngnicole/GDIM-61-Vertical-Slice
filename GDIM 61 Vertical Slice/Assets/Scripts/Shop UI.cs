@@ -5,10 +5,10 @@ public class ShopUI : MonoBehaviour
 {
     public static ShopUI Instance { get; private set; }
 
-    public const int RedMachineCost = 30;
-    public const int BlueMachineCost = 50;
-    public const int MuffinCost = 10;
-    public const int CakeCost = 20;
+    public const int RedMachineCost = 20;
+    public const int BlueMachineCost = 40;
+    public const int MuffinCost = 60;
+    public const int CakeCost = 90;
 
     public const string BlueMachineId = "blue machine";
     public const string RedMachineId  = "red machine";

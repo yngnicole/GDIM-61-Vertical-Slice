@@ -18,7 +18,7 @@ public class CoffeeMachine : MonoBehaviour
     public bool IsBrewing => _isBrewing;
     public bool IsDrinkReady => _drinkReady;
     public OrderType MachineColor { get; private set; } = OrderType.Red;
-    public int BrewCost => MachineColor == OrderType.Blue ? 5 : 3;
+    public int BrewCost => MachineColor == OrderType.Blue ? 4 : 2;
 
     public void SetMachineColor(OrderType c) { MachineColor = c; UpdateLabel(); }
 

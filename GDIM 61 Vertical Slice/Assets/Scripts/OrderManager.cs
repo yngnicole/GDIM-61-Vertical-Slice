@@ -9,8 +9,8 @@ public class OrderManager : MonoBehaviour
     [Header("Money")]
     [SerializeField] int _startingMoney = 50;
 
-    const int BlueBrewCost = 5;
-    const int RedBrewCost = 3;
+    const int BlueBrewCost = 4;
+    const int RedBrewCost = 2;
     const int AbandonPenalty = 1;
 
     // null = empty hand; else holding that order type.

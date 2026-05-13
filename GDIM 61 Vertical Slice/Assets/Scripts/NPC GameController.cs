@@ -11,6 +11,9 @@ public class NPCGameController : MonoBehaviour
     const int MaxNPCs = 5;
     const float MinInterval = 1f;
     const float MaxInterval = 5f;
+    // Matches the localScale on NPC 1.prefab / NPC 2.prefab; applied to every
+    // spawn so the auto-generated aseprite prefab (NPC 3) doesn't render small.
+    const float NPCSpawnScale = 3.3575f;
 
     // Slots form a queue extending to the lower-right of the door at (-3.5, -1.1).
     // Slot 0 is closest to the door; later slots are further right.
@@ -79,6 +82,7 @@ public class NPCGameController : MonoBehaviour
         destGo.transform.position = Slots[slot] + jitter;
 
         GameObject npcObj = Instantiate(prefab, _runtimeSpawn.position, Quaternion.identity);
+        npcObj.transform.localScale = Vector3.one * NPCSpawnScale;
         NPC npc = npcObj.GetComponent<NPC>() ?? npcObj.AddComponent<NPC>();
 
         npc.SetDestination(destGo.transform);
