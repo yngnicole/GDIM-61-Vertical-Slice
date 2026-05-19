@@ -333,7 +333,7 @@ GameObject:
   - component: {fileID: 216830596}
   - component: {fileID: 216830595}
   - component: {fileID: 216830594}
-  m_Layer: 31
+  m_Layer: 0
   m_Name: Shop icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2706,7 +2706,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1497980111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2768,7 +2768,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!224 &1497980114
 RectTransform:
@@ -3886,6 +3886,7 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1497980114}
   - {fileID: 519420032}
   - {fileID: 640620899}
   - {fileID: 691222697}
@@ -3893,4 +3894,3 @@ SceneRoots:
   - {fileID: 1899495819}
   - {fileID: 958720640}
   - {fileID: 1624527897}
-  - {fileID: 1497980114}
