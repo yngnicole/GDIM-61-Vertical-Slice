@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 296886c9e012e3146a691f377953c1de
+guid: 5fbaa2f8f161ab241a044ea2eb2fcd54
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -122,9 +122,9 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: coffee timer
+  - name: full_progress_bar
     originalName: 
-    pivot: {x: 0.5, y: -1.5}
+    pivot: {x: 0.5, y: -2.1666667}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
@@ -132,8 +132,8 @@ ScriptedImporter:
       x: 4
       y: 4
       width: 30
-      height: 8
-    spriteID: 70b3c06e8e0d3fa42930ac456982adb7
+      height: 6
+    spriteID: c761bbd8c08244149ae6211edfe1b100
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -146,25 +146,25 @@ ScriptedImporter:
   asepriteLayers:
   - layerIndex: 0
     uuid:
-      value0: 1925900499
+      value0: 2228340719
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: coffee timer
+    name: full_progress_bar
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: coffee timer
+    - name: full_progress_bar
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
         x: 1
-        y: 12
+        y: 13
         width: 30
-        height: 8
-      spriteId: 70b3c06e8e0d3fa42930ac456982adb7
+        height: 6
+      spriteId: c761bbd8c08244149ae6211edfe1b100
     linkedCells: []
     parentIndex: -1
   platformSettings:
